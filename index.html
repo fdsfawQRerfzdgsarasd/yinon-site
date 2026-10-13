@@ -285,7 +285,7 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
 }
 
 </style>
-<style>html, body { scrollbar-width: none; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }</style></head>
+<style>html, body { scrollbar-width: none; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }</style><style>.why-action { text-align: center; padding: 22px 20px 28px; background: #000; } .why-action .cta { background: var(--sun); color: #141a33; box-shadow: 0 5px 0 #b8860b; min-width: 180px; font-size: 1.35rem; }</style></head>
 <body>
 
   <header class="poster">
@@ -298,6 +298,7 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
     </picture>
     </div>
   </header>
+  <div class="why-action"><button class="cta" id="whyBtn" type="button">למה ינון?</button></div>
 
   <section id="why" class="band light" aria-labelledby="why-title"><div class="wrap">
     <h2 id="why-title">מה ינון יעשה בוועד</h2>
@@ -432,6 +433,14 @@ function firstInteraction(e) {
 musicBtn.addEventListener('click', () => {
   if (song.paused) { userPaused = false; tryPlay(); }
   else { userPaused = true; song.pause(); }
+});
+
+document.getElementById('whyBtn').addEventListener('click', () => {
+  userPaused = false;
+  song.muted = false;
+  if (song.volume === 0) { song.volume = .7; vol.value = 70; }
+  tryPlay();
+  document.getElementById('why').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
 });
 
 // Funny promises
