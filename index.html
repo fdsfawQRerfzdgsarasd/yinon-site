@@ -394,17 +394,7 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
     <div class="jokes" id="jokes"></div>
   </div></section>
 
-  <section class="band" aria-labelledby="decision-title"><div class="wrap"><div class="decision-game">
-<span class="tag">8 מתמודדים. אתם מחליטים.</span><h2 id="decision-title">מתמודד או כאפה?</h2>
-<p class="sub">ינון פוגש את המתחרים. שומעים את ההבטחה ובוחרים מה קורה עכשיו.</p>
-<div class="decision-progress" id="decisionProgress"></div>
-<div class="candidate-card" id="candidateCard"><div class="candidate-art" id="candidateArt" role="img"></div><span class="slap-hand" aria-hidden="true">✋</span><span class="decision-stamp" id="decisionStamp" aria-hidden="true"></span><div class="candidate-copy"><h3 id="candidateName"></h3><p id="candidatePitch"></p></div></div>
-<p id="decisionMessage" role="status">מי מקבל מקום במרוץ?</p>
-<div class="decision-actions"><button class="cta allow" id="allowCandidate">לתת להתמודד ✓</button><button class="cta slap" id="slapCandidate">לתת כאפה ✋</button></div>
-<button class="cta" id="nextCandidate" hidden>למתמודד הבא ←</button>
-<div id="decisionResults" hidden></div><button class="again" id="decisionAgain" hidden>סיבוב חדש</button>
-<p class="game-help">המתמודדים דמיוניים. הכאפות מצוירות. ההבטחות? תחליטו בעצמכם 😎</p>
-</div></div></section>
+  
 
   <div class="band"><div class="wrap"><section class="vote" aria-labelledby="vote-title">
     <div>
@@ -516,16 +506,6 @@ JOKES.forEach(([promise, status]) => {
   });
   jokesEl.append(b);
 });
-
-// Eight fictional candidates, two comic choices, and a complete round summary.
-(() => {
- const people=[['רוני הרשימות','אני מבטיח להכין רשימה של כל הרשימות!'],['דנה הדרמה','כל הודעה בקבוצה תגיע עם טריילר דרמטי.'],['גבי המזגן','18 מעלות. גם בחורף. אין משא ומתן.'],['נועה ההפסקות','אצלי השיעור יהיה הפסקה בין שתי הפסקות.'],['אורי האירועים','כל יום מסיבה. מי צריך סיבה?'],['מיקה המתוקים','ישיבת ועד בלי עוגיות? לא במשמרת שלי.'],['תומר הזורם','אין לי מצע, אבל תזרמו איתי.'],['שירה הסדר','גם לבלאגן יהיה לוח זמנים מסודר.']];
- const el=id=>document.getElementById(id),card=el('candidateCard'),art=el('candidateArt'),allow=el('allowCandidate'),slap=el('slapCandidate'),next=el('nextCandidate'),again=el('decisionAgain'),results=el('decisionResults'),message=el('decisionMessage');
- let index=0,choices=[];
- function render(){card.className='candidate-card';card.hidden=false;results.hidden=true;again.hidden=true;next.hidden=true;allow.disabled=slap.disabled=false;allow.parentElement.hidden=false;el('decisionProgress').textContent=`מתמודד ${index+1} מתוך 8`;el('candidateName').textContent=people[index][0];el('candidatePitch').textContent='״'+people[index][1]+'״';art.style.backgroundPosition=`${(index%4)*100/3}% ${index<4?0:100}%`;art.setAttribute('aria-label','איור של '+people[index][0]);message.textContent='מי מקבל מקום במרוץ?';}
- function choose(ok){if(choices.length!==index)return;choices.push(ok);allow.disabled=slap.disabled=true;card.classList.add(ok?'allowed':'slapped');el('decisionStamp').textContent=ok?'במרוץ! ✓':'פאף! ✋';message.textContent=ok?people[index][0]+' נכנסו למרוץ. ינון, יש לך תחרות!':'כאפה מצוירת! '+people[index][0]+' הולכים לנסח מצע חדש 😵‍💫';next.textContent=index===7?'לתוצאות הסיבוב ←':'למתמודד הבא ←';next.hidden=false;next.focus({preventScroll:true});}
- allow.addEventListener('click',()=>choose(true));slap.addEventListener('click',()=>choose(false));next.addEventListener('click',()=>{index++;if(index<8){render();allow.focus({preventScroll:true});return;}card.hidden=true;allow.parentElement.hidden=true;next.hidden=true;results.hidden=false;again.hidden=false;el('decisionProgress').textContent='8 מתוך 8 — הסיבוב הושלם';const accepted=choices.filter(Boolean).length;results.innerHTML='<h3>המרוץ לוועד מוכן! 🗳️</h3><p>'+accepted+' מתמודדים קיבלו אישור ✓</p><p>'+(8-accepted)+' כאפות מצוירות חולקו ✋</p>';message.textContent='ובסוף… ינון נשאר ינון 😎';again.focus({preventScroll:true});});again.addEventListener('click',()=>{index=0;choices=[];render();allow.focus({preventScroll:true});});render();
-})();
 
 // Ballot: drag Yinon's slip into the box (or press the button) and it slides through the slot.
 const stage = document.getElementById('stage');
