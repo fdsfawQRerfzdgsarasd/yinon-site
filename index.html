@@ -303,7 +303,28 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
 .game-help { font-size: .9rem; color: var(--muted); margin: 16px 0 0; }
 @media(max-width: 420px) { .catch-board { gap: 8px; } .catch-cell { border-radius: 12px; } }
 </style>
-</head>
+<style>
+.maze-game { max-width: 600px; margin:auto; text-align:center; }
+.maze-heading { display:flex; align-items:center; justify-content:center; gap:18px; }
+.maze-heading img { width:80px; height:90px; object-fit:contain; }
+.maze-heading h2 { margin:12px 0 0; }
+.maze-game .sub { margin:18px 0; }
+.maze-stats { display:flex; gap:8px; margin:14px 0; }
+.maze-stats span { flex:1; background:#141b35; border:1px solid #2e416f; border-radius:12px; padding:8px; color:#c3cce5; }
+.maze-stats b { display:block; color:#ffd25e; font-size:1.3rem; }
+#mazeCanvas { display:block; width:100%; max-width:480px; margin-inline:auto; height:auto; border:2px solid #4d68ff; border-radius:16px; background:#080e23; touch-action:none; }
+#mazeCanvas:focus-visible { outline:3px solid #ffd25e; outline-offset:4px; }
+#mazeMessage { min-height:1.6em; font-weight:800; margin:12px 0; }
+.maze-actions { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+.maze-pad { display:grid; grid-template-columns:repeat(3,54px); grid-template-rows:repeat(2,48px); justify-content:center; gap:6px; direction:ltr; margin:20px 0 10px; }
+.maze-pad button { border:1px solid #52658d; border-radius:12px; background:#182443; color:#fff; font-size:1.6rem; cursor:pointer; touch-action:manipulation; }
+.maze-pad button:active { background:#4d68ff; }
+.maze-pad button[data-dir="up"] { grid-column:2; }
+.maze-pad button[data-dir="left"] { grid-row:2; grid-column:1; }
+.maze-pad button[data-dir="down"] { grid-row:2; grid-column:2; }
+.maze-pad button[data-dir="right"] { grid-row:2; grid-column:3; }
+.maze-game button:disabled { opacity:.5; cursor:default; }
+</style></head>
 <body>
 
   <header class="poster">
@@ -371,18 +392,16 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
     <div class="jokes" id="jokes"></div>
   </div></section>
 
-  <section class="band light" aria-labelledby="game-title"><div class="wrap">
-    <div class="catch-game">
-      <span class="tag">אתגר של 30 שניות</span>
-      <h2 id="game-title">תופסים את ינון!</h2>
-      <p class="sub">ינון קופץ בין המשבצות. לחצו עליו לפני שהוא זז וצברו נקודות!</p>
-      <div class="game-stats"><span>ניקוד <strong id="gameScore">0</strong></span><span>זמן <strong id="gameTime">30</strong></span><span>השיא שלך <strong id="gameBest">0</strong></span></div>
-      <div class="catch-board" id="catchBoard" role="group" aria-label="לוח המשחק"></div>
-      <p class="game-message" id="gameMessage" role="status">מוכנים? ינון לא מחכה לאף אחד 😎</p>
-      <button class="cta" id="gameStart" type="button">מתחילים לשחק</button>
-      <p class="game-help">בנייד: נוגעים בתמונה · במחשב: לוחצים, או משתמשים במקשים 1–9</p>
-    </div>
-  </div></section>
+  <section class="band" aria-labelledby="maze-title"><div class="wrap"><div class="maze-game">
+<div class="maze-heading"><img src="yinon-avatar.png" alt="ינון בגרסה מאוירת"><div><span class="tag">המרוץ לוועד</span><h2 id="maze-title">ימיני במבוך!</h2></div></div>
+<p class="sub">אספו את כל הפתקים וברחו מהמוקשים — גם הם רוצים להתמודד! כוכב נותן מגן ל־6 שניות.</p>
+<div class="maze-stats"><span>פתקים <b id="mazeScore">0</b></span><span>חיים <b id="mazeLives">♥ ♥ ♥</b></span><span>מגן <b id="mazeShield">—</b></span></div>
+<canvas id="mazeCanvas" width="600" height="600" tabindex="0" aria-label="מבוך המשחק. שליטה בחצים או בכפתורי הכיוון שמתחת ללוח.">משחק מבוך: השתמשו בדפדפן התומך בקנבס.</canvas>
+<p id="mazeMessage" role="status">ינון מוכן. מי יגיע לוועד?</p>
+<div class="maze-actions"><button class="cta" id="mazeStart">מתחילים במרוץ</button><button class="again" id="mazePause" disabled>השהיה</button></div>
+<div class="maze-pad" role="group" aria-label="כפתורי כיוון"><button data-dir="up" aria-label="למעלה">↑</button><button data-dir="left" aria-label="שמאלה">←</button><button data-dir="down" aria-label="למטה">↓</button><button data-dir="right" aria-label="ימינה">→</button></div>
+<p class="game-help">חצים במחשב · כפתורי הכיוון או החלקה על הלוח בנייד · רווח להשהיה</p>
+</div></div></section>
 
   <div class="band"><div class="wrap"><section class="vote" aria-labelledby="vote-title">
     <div>
@@ -495,58 +514,68 @@ JOKES.forEach(([promise, status]) => {
   jokesEl.append(b);
 });
 
-// Catch Yinon: one target, a fixed round, and a local personal best.
+// Original maze chase game with keyboard and touch controls.
 (() => {
-  const board = document.getElementById('catchBoard');
-  const start = document.getElementById('gameStart');
-  const scoreEl = document.getElementById('gameScore');
-  const timeEl = document.getElementById('gameTime');
-  const bestEl = document.getElementById('gameBest');
-  const message = document.getElementById('gameMessage');
-  let running = false, score = 0, best = 0, active = -1, deadline = 0, ticker, jump;
-  try { best = Number(localStorage.getItem('yinon-catch-best')) || 0; } catch (_) {}
-  bestEl.textContent = best;
-  const cells = Array.from({length: 9}, (_, i) => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'catch-cell'; b.disabled = true;
-    b.setAttribute('aria-label', `משבצת ${i + 1}`);
-    b.innerHTML = '<img src="yinon-game.png" alt="" draggable="false"><span class="cell-number">'+(i+1)+'</span>';
-    b.addEventListener('click', () => hit(i)); board.append(b); return b;
-  });
-  function move() {
-    if (!running) return;
-    const previous = active;
-    if (previous >= 0) { cells[previous].classList.remove('active'); cells[previous].setAttribute('aria-label', `משבצת ${previous+1}`); }
-    active = (previous + 1 + Math.floor(Math.random()*8)) % 9;
-    cells[active].classList.add('active'); cells[active].setAttribute('aria-label', `ינון במשבצת ${active+1}`);
-    clearTimeout(jump); jump = setTimeout(move, Math.max(600, 1200-score*20));
-  }
-  function finish() {
-    running = false; clearInterval(ticker); clearTimeout(jump);
-    cells.forEach(b => { b.disabled = true; b.classList.remove('active'); }); active = -1;
-    timeEl.textContent = '0';
-    const record = score > best;
-    if (record) { best = score; bestEl.textContent = best; try { localStorage.setItem('yinon-catch-best',String(best)); } catch (_) {} }
-    message.textContent = (record ? 'שיא חדש! 🏆 ' : 'כל הכבוד! ') + `תפסתם את ינון ${score} פעמים. עוד סיבוב?`;
-    start.disabled = false; start.textContent = 'משחקים שוב';
-  }
-  function hit(i) {
-    if (!running) return;
-    if (performance.now() >= deadline) { finish(); return; }
-    if (i !== active) return;
-    score++; scoreEl.textContent = score; move();
-  }
-  start.addEventListener('click', () => {
-    score = 0; scoreEl.textContent = '0'; timeEl.textContent = '30'; running = true; deadline = performance.now()+30000;
-    start.disabled = true; message.textContent = 'תפסו אותו! כל לחיצה מדויקת שווה נקודה.';
-    board.closest('.catch-game').scrollIntoView({behavior: 'instant', block: 'start'}); cells.forEach(b => b.disabled = false); move(); cells[0].focus({preventScroll:true});
-    ticker = setInterval(() => { const remaining = Math.max(0,Math.ceil((deadline-performance.now())/1000)); timeEl.textContent = remaining; if (!remaining) finish(); },100);
-  });
-  document.addEventListener('keydown', e => {
-    if (!running || e.repeat || e.ctrlKey || e.altKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
-    if (/^[1-9]$/.test(e.key)) { e.preventDefault(); hit(Number(e.key)-1); }
-  });
+ const map = [
+ '###############',
+ '#.....#.......#',
+ '#.###.#.###.#.#',
+ '#o#.......#.#o#',
+ '#.#.###.#.#.#.#',
+ '#...#...#.....#',
+ '###.#.#####.#.#',
+ '#...#.......#.#',
+ '#.#####.###.#.#',
+ '#.......#.....#',
+ '#.###.#.#.###.#',
+ '#o..#.#.....#o#',
+ '#.#.#.#####.#.#',
+ '#.#...........#',
+ '###############'];
+ const canvas=document.getElementById('mazeCanvas'), ctx=canvas.getContext('2d');
+ const start=document.getElementById('mazeStart'), pause=document.getElementById('mazePause'), msg=document.getElementById('mazeMessage');
+ const scoreEl=document.getElementById('mazeScore'), livesEl=document.getElementById('mazeLives'), shieldEl=document.getElementById('mazeShield');
+ const avatar=new Image(); avatar.src='yinon-avatar.png'; avatar.onload=draw;
+ const dirs={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}, size=40;
+ let player, enemies, pellets, powers, score=0,lives=3,shield=0,invincible=0, elapsed=0;
+ let state='ready', direction='right', desired='right', last=0,acc=0,enemyAcc=0,total=0;
+ const walk=(x,y)=>map[y]?.[x] && map[y][x]!=='#';
+ const key=(x,y)=>x+','+y;
+ const same=(a,b)=>a.x===b.x&&a.y===b.y;
+ function positions(){ player={x:1,y:1}; enemies=[{x:13,y:13,color:'#ff657b'},{x:13,y:1,color:'#b38aff'},{x:1,y:13,color:'#ff9a49'}]; direction=desired='right'; }
+ function reset(){ positions();score=0;lives=3;shield=0;invincible=0;elapsed=0;pellets=new Set();powers=new Set();
+ map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='.')pellets.add(key(x,y));if(c==='o')powers.add(key(x,y));}));pellets.delete('1,1');total=pellets.size;pulse();draw(); }
+ function pulse(){scoreEl.textContent=score+' / '+total;livesEl.textContent='♥ '.repeat(lives).trim();shieldEl.textContent=shield>elapsed?Math.ceil((shield-elapsed)/1000)+' שנ׳':'—';}
+ function end(won){state='over';pause.disabled=true;start.disabled=false;start.textContent='עוד מרוץ';msg.textContent=won?'ינון ניצח במרוץ לוועד! 🏆 כל הפתקים נאספו.':'המתמודדים תפסו את ינון! נסו שוב 💪';draw();}
+ function collide(){if(elapsed<invincible)return;const foe=enemies.find(e=>same(e,player));if(!foe)return;if(shield>elapsed){foe.x=13;foe.y=13;return;}lives--;if(!lives){pulse();end(false);return;}positions();invincible=elapsed+2000;msg.textContent='אופס! נשארו '+lives+' חיים. יש לכם רגע לברוח.';}
+ function step(){
+ let d=dirs[desired];if(walk(player.x+d[0],player.y+d[1]))direction=desired;
+ d=dirs[direction];if(walk(player.x+d[0],player.y+d[1])){player.x+=d[0];player.y+=d[1];}
+ const k=key(player.x,player.y);if(pellets.delete(k))score++;
+ if(powers.delete(k)){shield=elapsed+6000;msg.textContent='מגן פעיל! עכשיו אפשר לעבור דרך המתמודדים ⭐';}
+ collide();if(state==='playing'&&!pellets.size)end(true);pulse();
+ }
+ function distances(){const out=new Map([[key(player.x,player.y),0]]),q=[player];for(let i=0;i<q.length;i++){const p=q[i];for(const [dx,dy] of Object.values(dirs)){const x=p.x+dx,y=p.y+dy,k=key(x,y);if(walk(x,y)&&!out.has(k)){out.set(k,out.get(key(p.x,p.y))+1);q.push({x,y});}}}return out;}
+ function chase(){const dist=distances();enemies.forEach(e=>{let opts=Object.values(dirs).map(([dx,dy])=>({x:e.x+dx,y:e.y+dy})).filter(p=>walk(p.x,p.y));opts.sort((a,b)=>(dist.get(key(a.x,a.y))-dist.get(key(b.x,b.y)))*(shield>elapsed?-1:1));const next=Math.random()<.25?opts[Math.floor(Math.random()*opts.length)]:opts[0];if(next){e.x=next.x;e.y=next.y;}});collide();}
+ function draw(){if(!player)return;ctx.clearRect(0,0,600,600);ctx.fillStyle='#080e23';ctx.fillRect(0,0,600,600);
+ map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='#'){ctx.fillStyle='#122957';ctx.fillRect(x*size+3,y*size+3,34,34);ctx.strokeStyle='#385bed';ctx.strokeRect(x*size+3.5,y*size+3.5,33,33);}}));
+ pellets.forEach(k=>{const [x,y]=k.split(',').map(Number);ctx.fillStyle='#ffe5a0';ctx.fillRect(x*size+16,y*size+15,8,10);});
+ powers.forEach(k=>{const [x,y]=k.split(',').map(Number);ctx.font='24px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('⭐',x*size+20,y*size+20);});
+ enemies.forEach(e=>{const x=e.x*size+20,y=e.y*size+20;ctx.strokeStyle=e.color;ctx.lineWidth=3;for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*11,y+Math.sin(a)*11);ctx.lineTo(x+Math.cos(a)*17,y+Math.sin(a)*17);ctx.stroke();}ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(x,y,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(x-7,y-5,5,6);ctx.fillRect(x+2,y-5,5,6);ctx.fillStyle='#111';ctx.fillRect(x-5,y-3,2,3);ctx.fillRect(x+3,y-3,2,3);});
+ const x=player.x*size,y=player.y*size;ctx.save();if(elapsed<invincible&&Math.floor(elapsed/120)%2)ctx.globalAlpha=.45;
+ ctx.strokeStyle=shield>elapsed?'#7dffe5':'#ffd25e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x+20,y+20,18,0,Math.PI*2);ctx.stroke();if(avatar.complete&&avatar.naturalWidth)ctx.drawImage(avatar,x+3,y+2,34,36);else {ctx.fillStyle='#ffd25e';ctx.beginPath();ctx.arc(x+20,y+20,14,0,Math.PI*2);ctx.fill();}ctx.restore();
+ if(state==='paused'||state==='over'){ctx.fillStyle='rgba(3,8,23,.8)';ctx.fillRect(0,220,600,150);ctx.fillStyle='#fff';ctx.font='bold 36px sans-serif';ctx.textAlign='center';ctx.fillText(state==='paused'?'הפסקה קטנה':lives?'ניצחון! 🏆':'נתראה במרוץ הבא',300,295);}
+ }
+ function frame(now){const delta=Math.min(now-last,100);last=now;if(state==='playing'){elapsed+=delta;acc+=delta;enemyAcc+=delta;if(acc>=155){acc-=155;step();}if(state==='playing'&&enemyAcc>=360){enemyAcc-=360;chase();}pulse();draw();}requestAnimationFrame(frame);}
+ function turn(d){if(state!=='playing')return;desired=d;}
+ function toggle(){if(state==='playing'){state='paused';pause.textContent='ממשיכים';}else if(state==='paused'){state='playing';pause.textContent='השהיה';canvas.focus({preventScroll:true});}draw();}
+ start.addEventListener('click',()=>{reset();state='playing';acc=enemyAcc=0;start.disabled=true;pause.disabled=false;pause.textContent='השהיה';msg.textContent='אספו פתקים. המוקשים כבר בדרך אליכם!';canvas.focus({preventScroll:true});canvas.scrollIntoView({block:'center',behavior:'instant'});});pause.addEventListener('click',toggle);
+ canvas.addEventListener('keydown',e=>{const d={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',a:'left',s:'down',d:'right'}[e.key];if(d){e.preventDefault();turn(d);}if(e.code==='Space'){e.preventDefault();toggle();}});
+ document.querySelectorAll('.maze-pad button').forEach(b=>b.addEventListener('click',e=>{turn(b.dataset.dir);}));
+ let touch=null;canvas.addEventListener('pointerdown',e=>{touch={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);canvas.focus({preventScroll:true});});canvas.addEventListener('pointerup',e=>{if(!touch)return;const dx=e.clientX-touch.x,dy=e.clientY-touch.y;if(Math.max(Math.abs(dx),Math.abs(dy))>12)turn(Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up');touch=null;});canvas.addEventListener('pointercancel',()=>touch=null);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')toggle();});reset();requestAnimationFrame(frame);
 })();
+
 
 // Ballot: drag Yinon's slip into the box (or press the button) and it slides through the slot.
 const stage = document.getElementById('stage');
