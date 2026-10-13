@@ -285,7 +285,25 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
 }
 
 </style>
-<style>html, body { scrollbar-width: none; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }</style><style>.why-action { text-align: center; padding: 22px 20px 28px; background: #000; } .why-action .cta { background: var(--sun); color: #141a33; box-shadow: 0 5px 0 #b8860b; min-width: 180px; font-size: 1.35rem; }</style></head>
+<style>html, body { scrollbar-width: none; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }</style><style>.why-action { text-align: center; padding: 22px 20px 28px; background: #000; } .why-action .cta { background: var(--sun); color: #141a33; box-shadow: 0 5px 0 #b8860b; min-width: 180px; font-size: 1.35rem; }</style><style>
+.catch-game { max-width: 620px; margin: auto; text-align: center; }
+.catch-game h2 { margin-top: 16px; }
+.game-stats { display: flex; justify-content: space-between; gap: 8px; margin: 22px 0 16px; }
+.game-stats > span { flex: 1; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); padding: 10px 4px; color: var(--muted); }
+.game-stats strong { display: block; color: var(--blue); font-size: 1.8rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.catch-board { max-width: 420px; margin-inline: auto; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; direction: ltr; }
+.catch-cell { position: relative; overflow: hidden; aspect-ratio: 1; border: 2px solid var(--line); border-radius: 18px; background: #e9edf9; padding: 0; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.catch-cell:disabled { cursor: default; }
+.catch-cell.active { border-color: var(--blue); background: var(--sun); box-shadow: 0 0 0 2px var(--blue); }
+.catch-cell img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: 50% 64%; opacity: 0; }
+.catch-cell.active img { opacity: 1; }
+.catch-cell .cell-number { position: absolute; bottom: 6px; left: 8px; background: #fff; color: #141a33; border-radius: 6px; padding: 0 7px; font-weight: 800; font-size: .8rem; }
+.catch-cell:focus-visible { outline: 4px solid var(--blue); outline-offset: 3px; }
+.game-message { min-height: 3.2em; margin: 20px 0 8px; font-weight: 800; }
+.game-help { font-size: .9rem; color: var(--muted); margin: 16px 0 0; }
+@media(max-width: 420px) { .catch-board { gap: 8px; } .catch-cell { border-radius: 12px; } }
+</style>
+</head>
 <body>
 
   <header class="poster">
@@ -353,12 +371,16 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
     <div class="jokes" id="jokes"></div>
   </div></section>
 
-  <section class="band light" aria-labelledby="quiz-title"><div class="wrap">
-    <h2 id="quiz-title">איזה טיפוס אתם בכיתה</h2>
-    <p class="sub">חמש שאלות תשובה אחת כנה רמז כל הטיפוסים מצביעים ינון</p>
-    <div class="quiz-layout">
-      <div class="quiz" id="quiz" aria-live="polite"></div>
-      <img class="quiz-photo" src="yinon-tongue.webp" width="941" height="1672" alt="ינון עושה פרצוף מצחיק עם הלשון בחוץ">
+  <section class="band light" aria-labelledby="game-title"><div class="wrap">
+    <div class="catch-game">
+      <span class="tag">אתגר של 30 שניות</span>
+      <h2 id="game-title">תופסים את ינון!</h2>
+      <p class="sub">ינון קופץ בין המשבצות. לחצו עליו לפני שהוא זז וצברו נקודות!</p>
+      <div class="game-stats"><span>ניקוד <strong id="gameScore">0</strong></span><span>זמן <strong id="gameTime">30</strong></span><span>השיא שלך <strong id="gameBest">0</strong></span></div>
+      <div class="catch-board" id="catchBoard" role="group" aria-label="לוח המשחק"></div>
+      <p class="game-message" id="gameMessage" role="status">מוכנים? ינון לא מחכה לאף אחד 😎</p>
+      <button class="cta" id="gameStart" type="button">מתחילים לשחק</button>
+      <p class="game-help">בנייד: נוגעים בתמונה · במחשב: לוחצים, או משתמשים במקשים 1–9</p>
     </div>
   </div></section>
 
@@ -473,67 +495,58 @@ JOKES.forEach(([promise, status]) => {
   jokesEl.append(b);
 });
 
-// Quiz: each answer adds a point to one type; the top type wins
-const TYPES = {
-  A: ['המארגן/ת', 'תמיד יש לך רשימה ותמיד יודעים על מי לסמוך ינון צריך אותך בצוות של מסיבת סוף השנה'],
-  B: ['הליצן/ית', 'בלעדיך הכיתה הייתה משעממת ינון מבטיח יותר אירועים כלומר יותר במה בשבילך'],
-  C: ['הישנוני/ת', 'ההפסקה היא השיעור האהוב עליך ינון כבר עובד על הפסקות טובות יותר ועל הספות'],
-  D: ['הלב של הכיתה', 'דואג/ת שאף אחד לא יישאר לבד בדיוק בשביל זה ינון רץ לוועד']
-};
-const QUESTIONS = [
-  ['מצלצל לסוף השיעור מה אתם עושים', [
-    ['A', 'בודק/ת מה יש בשיעור הבא'], ['B', 'רץ/ה ראשון/ה לחצר עם בדיחה מוכנה'],
-    ['C', 'ממשיך/ה לישון עוד חמש דקות'], ['D', 'מחכה לחבר/ה שעוד אורז/ת']]],
-  ['יוצאים לטיול מה התפקיד שלכם', [
-    ['A', 'מכין/ה רשימת ציוד לכולם'], ['B', 'אחראי/ת על השירים באוטובוס'],
-    ['C', 'תופס/ת את הכיסא האחורי ונרדם/ת'], ['D', 'דואג/ת שכולם יושבים עם מישהו']]],
-  ['מה הכי חסר בכיתה', [
-    ['A', 'לוח מסודר עם כל המבחנים'], ['B', 'יותר מסיבות'],
-    ['C', 'ספות הרבה ספות'], ['D', 'שכולם ירגישו חלק']]],
-  ['חבר/ה שכח/ה שיעורי בית מה אתם עושים', [
-    ['A', 'שולח/ת סיכום מסודר'], ['B', 'מסביר/ה למורה שהכלב אכל אותם'],
-    ['C', 'גם אני שכחתי'], ['D', 'עוזר/ת להשלים בהפסקה']]],
-  ['ינון נבחר מה תשתו מהקולר', [
-    ['A', 'מים מישהו צריך להיות אחראי'], ['B', 'מיץ ענבים ברור'],
-    ['C', 'מה שהכי קרוב'], ['D', 'מה שכולם שותים']]]
-];
-const quizEl = document.getElementById('quiz');
-let qIndex = 0, scores = {};
-function renderQuestion() {
-  const [text, opts] = QUESTIONS[qIndex];
-  quizEl.innerHTML = `
-    <div class="q-progress">שאלה ${qIndex + 1} מתוך ${QUESTIONS.length}</div>
-    <div class="q-bar"><span style="width:${(qIndex / QUESTIONS.length) * 100}%"></span></div>
-    <p class="q-text"></p>
-    <div class="q-options"></div>`;
-  quizEl.querySelector('.q-text').textContent = text;
-  const box = quizEl.querySelector('.q-options');
-  opts.forEach(([type, label]) => {
+// Catch Yinon: one target, a fixed round, and a local personal best.
+(() => {
+  const board = document.getElementById('catchBoard');
+  const start = document.getElementById('gameStart');
+  const scoreEl = document.getElementById('gameScore');
+  const timeEl = document.getElementById('gameTime');
+  const bestEl = document.getElementById('gameBest');
+  const message = document.getElementById('gameMessage');
+  let running = false, score = 0, best = 0, active = -1, deadline = 0, ticker, jump;
+  try { best = Number(localStorage.getItem('yinon-catch-best')) || 0; } catch (_) {}
+  bestEl.textContent = best;
+  const cells = Array.from({length: 9}, (_, i) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'opt'; b.textContent = label;
-    b.addEventListener('click', () => {
-      scores[type] = (scores[type] || 0) + 1;
-      qIndex++;
-      qIndex < QUESTIONS.length ? renderQuestion() : renderResult();
-    });
-    box.append(b);
+    b.type = 'button'; b.className = 'catch-cell'; b.disabled = true;
+    b.setAttribute('aria-label', `משבצת ${i + 1}`);
+    b.innerHTML = '<img src="yinon-game.png" alt="" draggable="false"><span class="cell-number">'+(i+1)+'</span>';
+    b.addEventListener('click', () => hit(i)); board.append(b); return b;
   });
-}
-function renderResult() {
-  const best = Object.keys(TYPES).reduce((a, b) => (scores[b] || 0) > (scores[a] || 0) ? b : a, 'A');
-  const [name, desc] = TYPES[best];
-  quizEl.innerHTML = `
-    <div class="q-result">
-      <div class="q-progress">יצא לך</div>
-      <div class="type"></div>
-      <p></p>
-      <button class="cta" type="button" id="quizAgain">לשחק שוב</button>
-    </div>`;
-  quizEl.querySelector('.type').textContent = name;
-  quizEl.querySelector('p').textContent = desc;
-  document.getElementById('quizAgain').addEventListener('click', () => { qIndex = 0; scores = {}; renderQuestion(); });
-}
-renderQuestion();
+  function move() {
+    if (!running) return;
+    const previous = active;
+    if (previous >= 0) { cells[previous].classList.remove('active'); cells[previous].setAttribute('aria-label', `משבצת ${previous+1}`); }
+    active = (previous + 1 + Math.floor(Math.random()*8)) % 9;
+    cells[active].classList.add('active'); cells[active].setAttribute('aria-label', `ינון במשבצת ${active+1}`);
+    clearTimeout(jump); jump = setTimeout(move, Math.max(600, 1200-score*20));
+  }
+  function finish() {
+    running = false; clearInterval(ticker); clearTimeout(jump);
+    cells.forEach(b => { b.disabled = true; b.classList.remove('active'); }); active = -1;
+    timeEl.textContent = '0';
+    const record = score > best;
+    if (record) { best = score; bestEl.textContent = best; try { localStorage.setItem('yinon-catch-best',String(best)); } catch (_) {} }
+    message.textContent = (record ? 'שיא חדש! 🏆 ' : 'כל הכבוד! ') + `תפסתם את ינון ${score} פעמים. עוד סיבוב?`;
+    start.disabled = false; start.textContent = 'משחקים שוב';
+  }
+  function hit(i) {
+    if (!running) return;
+    if (performance.now() >= deadline) { finish(); return; }
+    if (i !== active) return;
+    score++; scoreEl.textContent = score; move();
+  }
+  start.addEventListener('click', () => {
+    score = 0; scoreEl.textContent = '0'; timeEl.textContent = '30'; running = true; deadline = performance.now()+30000;
+    start.disabled = true; message.textContent = 'תפסו אותו! כל לחיצה מדויקת שווה נקודה.';
+    board.closest('.catch-game').scrollIntoView({behavior: 'instant', block: 'start'}); cells.forEach(b => b.disabled = false); move(); cells[0].focus({preventScroll:true});
+    ticker = setInterval(() => { const remaining = Math.max(0,Math.ceil((deadline-performance.now())/1000)); timeEl.textContent = remaining; if (!remaining) finish(); },100);
+  });
+  document.addEventListener('keydown', e => {
+    if (!running || e.repeat || e.ctrlKey || e.altKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (/^[1-9]$/.test(e.key)) { e.preventDefault(); hit(Number(e.key)-1); }
+  });
+})();
 
 // Ballot: drag Yinon's slip into the box (or press the button) and it slides through the slot.
 const stage = document.getElementById('stage');
