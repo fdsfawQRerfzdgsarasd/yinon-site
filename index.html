@@ -326,6 +326,19 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
 .maze-game button:disabled { opacity:.5; cursor:default; }
 </style><style>
 .decision-game{max-width:540px;margin:auto;text-align:center}.decision-game h2{margin:18px 0 12px}.decision-progress{color:#ffd25e;font-weight:800;margin:16px 0}.candidate-card{position:relative;max-width:340px;margin:auto;border-radius:22px;overflow:hidden;background:#fff9e8;color:#141a33;border:3px solid #ffd25e}.candidate-art{width:100%;aspect-ratio:1/1.42;background-image:url('candidates-ai.png');background-size:400% 200%;background-repeat:no-repeat}.candidate-copy{padding:12px 18px 18px;background:#fff9e8;min-height:122px}.candidate-copy h3{margin:0;font-size:1.5rem}.candidate-copy p{margin:6px 0 0;font-size:1.1rem;font-weight:600}.slap-hand{position:absolute;top:30%;right:-100px;font-size:6rem;opacity:0;pointer-events:none}.decision-stamp{position:absolute;top:16px;left:12px;font-size:1.3rem;font-weight:800;border:3px solid currentColor;padding:6px 12px;border-radius:10px;background:#fff;transform:rotate(-10deg);display:none}.candidate-card.allowed .decision-stamp,.candidate-card.slapped .decision-stamp{display:block}.candidate-card.allowed .decision-stamp{color:#16834e}.candidate-card.slapped .decision-stamp{color:#d3435d}.candidate-card.slapped .candidate-art{animation:comic-wobble .5s ease}.candidate-card.slapped .slap-hand{animation:comic-slap .55s ease}.decision-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0}.decision-actions button{flex:1;min-width:145px}.decision-actions .allow{background:#16834e;box-shadow:0 5px 0 #0b5330}.decision-actions .slap{background:#ffd25e;color:#141a33;box-shadow:0 5px 0 #b8860b}#decisionMessage{min-height:3.2em;margin:16px 0 8px;font-weight:800}#decisionResults{padding:28px 18px;background:#141b35;border:1px solid #4d68ff;border-radius:20px;margin-bottom:20px}#decisionResults h3{font-size:1.7rem;margin:0 0 16px}#decisionResults p{font-size:1.15rem}.decision-game button:disabled{opacity:.65;cursor:default}@keyframes comic-wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-7deg) translateX(-14px)}60%{transform:rotate(5deg) translateX(8px)}}@keyframes comic-slap{0%{right:-100px;opacity:0}35%,55%{right:25%;opacity:1}100%{right:90%;opacity:0}}@media(prefers-reduced-motion:reduce){.candidate-card.slapped .candidate-art,.candidate-card.slapped .slap-hand{animation:none}}@media(max-width:420px){.candidate-card{max-width:280px}.candidate-art{aspect-ratio:1/1.15}.decision-actions .cta{font-size:1rem;padding:14px 10px;min-width:120px}}
+</style><style>
+.stage { height:460px; max-width:100%; }
+.stage .lid { top:260px; background:linear-gradient(#f4f6ff,#b4bfe3); }
+.stage .slot { top:268px; }
+.stage .front { top:281px; background:linear-gradient(135deg,#fff,#e8edff); box-shadow:0 18px 25px #101c6744; }
+.stage .hint { top:438px; font-size:.85rem; }
+.choice-ballot { width:90px; height:122px; border-radius:8px; border:2px solid #d2d8ed; transition:box-shadow .15s; }
+.choice-ballot[aria-pressed="true"] { outline:3px solid #ffd25e; outline-offset:3px; box-shadow:0 10px 26px #07134266; }
+.choice-ballot .b-name { font-size:.75rem; }
+.ballot-mark { font-size:.68rem; font-weight:800; color:#2340d8; margin-top:6px; }
+.choice-ballot[data-candidate="roy"] .b-letters {color:#8052b8}
+.choice-ballot[data-candidate="amitai"] .b-letters {color:#177a73}
+.vote .thanks { min-height:3.2em; max-width:46ch; margin-inline:auto; }
 </style></head>
 <body>
 
@@ -399,9 +412,9 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
   <div class="band"><div class="wrap"><section class="vote" aria-labelledby="vote-title">
     <div>
       <h2 id="vote-title">ביום הבחירות שימו ינון</h2>
-      <p>כל קול חשוב תגיעו להצביע תביאו חברים ובואו נעשה ביחד שנה מעולה</p>
+      <p>בחרו פתק ונסו להכניס אותו לקלפי. יש שלוש אפשרויות — אבל הקלפי הזאת בעד ינון 😉</p>
       <div class="vote-actions">
-        <button class="cta" id="voteBtn" type="button">אני בעד ינון</button>
+        <button class="cta" id="voteBtn" type="button">הכניסו את הפתק הנבחר 🗳️</button>
       </div>
       <div class="thanks" id="thanks" aria-live="polite"></div>
     </div>
@@ -410,12 +423,11 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
     <div class="stage" id="stage">
       <div class="lid"></div>
       <div class="slot"></div>
-      <button class="ballot" id="ballot" type="button" aria-label="הפתק של ינון ימיני לחצו Enter כדי לשים אותו בקלפי">
-        <span class="b-letters">ינ</span>
-        <span class="b-name">ינון ימיני</span>
-      </button>
+      <button class="ballot choice-ballot" data-candidate="yinon" type="button" aria-label="בחרו פתק של ינון ימיני" aria-pressed="true"><span class="b-letters">ינ</span><span class="b-name">ינון ימיני</span><span class="ballot-mark">נבחר ✓</span></button>
+      <button class="ballot choice-ballot" data-candidate="roy" type="button" aria-label="בחרו פתק של רועי הרמן" aria-pressed="false"><span class="b-letters">רה</span><span class="b-name">רועי הרמן</span><span class="ballot-mark">בחרו בי</span></button>
+      <button class="ballot choice-ballot" data-candidate="amitai" type="button" aria-label="בחרו פתק של אמיתי שטקלר" aria-pressed="false"><span class="b-letters">אש</span><span class="b-name">אמיתי שטקלר</span><span class="ballot-mark">בחרו בי</span></button>
       <div class="front"><span class="f-title">קלפי</span><span class="f-sub">ועד הכיתה</span></div>
-      <p class="hint" id="hint">גררו את הפתק של ינון לתוך הקלפי</p>
+      <p class="hint" id="hint">בחרו פתק או גררו אותו לקלפי</p>
     </div>
     </div>
   </section></div></div>
@@ -507,106 +519,38 @@ JOKES.forEach(([promise, status]) => {
   jokesEl.append(b);
 });
 
-// Ballot: drag Yinon's slip into the box (or press the button) and it slides through the slot.
-const stage = document.getElementById('stage');
-const ballot = document.getElementById('ballot');
-const front = stage.querySelector('.front');
-const hint = document.getElementById('hint');
-const thanks = document.getElementById('thanks');
-const W = 90, H = 120;
-const HOME = { x: 175, y: 40, r: 8 };
-const SLOT = { x: 150, y: 197 };
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const dur = ms => reduce ? 1 : ms;
-let pos = { ...HOME }, busy = false, drag = null, count = 0;
-
-const tf = p => `translate(${p.x}px, ${p.y}px) rotate(${p.r}deg)`;
-function place(p) { ballot.style.transform = tf(p); }
-place(pos);
-
-async function moveTo(target, ms, easing) {
-  const from = tf(pos);
-  pos = { ...target };
-  place(pos);
-  await ballot.animate([{ transform: from }, { transform: tf(pos) }], { duration: dur(ms), easing }).finished;
-}
-
-function confetti() {
-  if (reduce) return;
-  const colors = ['#ffd25e', '#ffffff', '#4d68ff', '#ffd25e'];
-  for (let i = 0; i < 30; i++) {
-    const b = document.createElement('div');
-    b.className = 'bit';
-    b.style.left = (SLOT.x - 4) + 'px';
-    b.style.top = (SLOT.y - 10) + 'px';
-    b.style.background = colors[i % colors.length];
-    stage.append(b);
-    const dx = (Math.random() - .5) * 280, dy = -60 - Math.random() * 130, r = (Math.random() - .5) * 720;
-    b.animate([
-      { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
-      { transform: `translate(${dx}px, ${dy}px) rotate(${r}deg)`, opacity: 1, offset: .45 },
-      { transform: `translate(${dx * 1.3}px, ${dy + 190}px) rotate(${r * 2}deg)`, opacity: 0 }
-    ], { duration: 1300 + Math.random() * 400, easing: 'cubic-bezier(.2,.7,.4,1)' }).onfinish = () => b.remove();
-  }
-}
-
-async function insert() {
-  if (busy) return;
-  busy = true;
-  hint.hidden = true;
-  // Line up above the slot, then slide down while clipping the part that has gone inside.
-  await moveTo({ x: SLOT.x - W / 2, y: SLOT.y - H - 6, r: 0 }, 280, 'ease-out');
-  const above = { ...pos }, inside = { ...pos, y: SLOT.y + 6 };
-  await ballot.animate([
-    { transform: tf(above), clipPath: 'inset(0 0 0 0)' },
-    { transform: tf(inside), clipPath: 'inset(0 0 100% 0)' }
-  ], { duration: dur(600), easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' }).finished;
-  ballot.hidden = true;
-  front.animate([
-    { transform: 'none' }, { transform: 'translateY(5px) scale(1.03, .97)' }, { transform: 'none' }
-  ], { duration: dur(320), easing: 'ease-out' });
-  confetti();
-  count++;
-  thanks.textContent = count === 1 ? 'הפתק בקלפי נתראה ביום הבחירות 🗳️' : `הכנסת ${count} פתקים לקלפי 🗳️`;
-  // A fresh slip drops in so you can go again as many times as you like
-  await new Promise(r => setTimeout(r, dur(450)));
-  ballot.getAnimations().forEach(a => a.cancel());
-  ballot.hidden = false;
-  pos = { ...HOME };
-  place(pos);
-  await ballot.animate([{ opacity: 0, transform: tf({ ...HOME, y: HOME.y - 30 }) }, { opacity: 1, transform: tf(HOME) }], { duration: dur(400), easing: 'ease-out' }).finished;
-  busy = false;
-}
-
-ballot.addEventListener('pointerdown', e => {
-  if (busy) return;
-  e.preventDefault();
-  ballot.setPointerCapture(e.pointerId);
-  drag = { px: e.clientX, py: e.clientY, x: pos.x, y: pos.y };
-  ballot.classList.add('dragging');
-  pos.r = 0;
-  place(pos);
-});
-ballot.addEventListener('pointermove', e => {
-  if (!drag) return;
-  pos.x = drag.x + e.clientX - drag.px;
-  pos.y = drag.y + e.clientY - drag.py;
-  place(pos);
-});
-function endDrag() {
-  if (!drag) return;
-  drag = null;
-  ballot.classList.remove('dragging');
-  const cx = pos.x + W / 2, cy = pos.y + H / 2;
-  if (cx > 30 && cx < 270 && cy > 110 && cy < 360) insert();
-  else moveTo(HOME, 350, 'cubic-bezier(.3,1.4,.5,1)');
-}
-ballot.addEventListener('pointerup', endDrag);
-ballot.addEventListener('pointercancel', endDrag);
-ballot.addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); insert(); }
-});
-document.getElementById('voteBtn').addEventListener('click', insert);
+// Choose or drag one of three ballots; only Yinon's is accepted.
+(() => {
+ const stage=document.getElementById('stage'),cards=[...stage.querySelectorAll('.choice-ballot')],front=stage.querySelector('.front'),thanks=document.getElementById('thanks'),button=document.getElementById('voteBtn');
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,ms=n=>reduce?1:n;
+ const homes=[{x:205,y:28,r:5},{x:105,y:20,r:-3},{x:5,y:28,r:-6}];
+ const positions=homes.map(p=>({...p}));let selected=0,busy=false,drag=null,suppressClick=false;
+ const tf=p=>`translate(${p.x}px,${p.y}px) rotate(${p.r}deg)`;
+ function place(i,p){positions[i]={...p};cards[i].style.transform=tf(p);}
+ function choose(i){if(busy)return;selected=i;cards.forEach((c,k)=>{c.setAttribute('aria-pressed',String(k===i));c.querySelector('.ballot-mark').textContent=k===i?'נבחר ✓':'בחרו בי';});}
+ function lock(on){busy=on;button.disabled=on;cards.forEach(c=>c.disabled=on);}
+ async function move(i,p,duration){const from=tf(positions[i]);place(i,p);await cards[i].animate([{transform:from},{transform:tf(p)}],{duration:ms(duration),easing:'ease-in-out'}).finished;}
+ function confetti(){if(reduce)return;for(let i=0;i<24;i++){const bit=document.createElement('span');bit.className='bit';bit.style.cssText=`left:146px;top:262px;background:${['#ffd25e','#fff','#85f4dd'][i%3]}`;stage.append(bit);bit.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${(Math.random()-.5)*250}px,${-100-Math.random()*80}px) rotate(180deg)`,opacity:1,offset:.5},{transform:`translate(${(Math.random()-.5)*280}px,130px) rotate(360deg)`,opacity:0}],{duration:1200}).onfinish=()=>bit.remove();}}
+ async function insert(i=selected){if(busy)return;choose(i);lock(true);const c=cards[i];c.style.zIndex=5;
+ try {await move(i,{x:105,y:136,r:0},260);
+ if(c.dataset.candidate==='yinon'){
+ await c.animate([{transform:tf(positions[i]),clipPath:'inset(0)'},{transform:tf({x:105,y:278,r:0}),clipPath:'inset(0 0 100% 0)'}],{duration:ms(650),fill:'forwards',easing:'ease-in'}).finished;
+ thanks.textContent='בול! ינון בפנים — הבחירה של הקלפי 🗳️✨';confetti();
+ await front.animate([{transform:'scale(1)'},{transform:'scale(1.05)'},{transform:'scale(1)'}],{duration:ms(300)}).finished;
+ }else{
+ thanks.textContent='הקלפי אומרת: הפתק הזה לא נכנס 😉 נסו את ינון!';
+ await front.animate([{transform:'translateX(0)'},{transform:'translateX(-7px)'},{transform:'translateX(7px)'},{transform:'translateX(0)'}],{duration:ms(320)}).finished;
+ await move(i,{x:105,y:90,r:-18},180);await move(i,homes[i],350);
+ }
+ }finally{c.getAnimations().forEach(a=>a.cancel());place(i,homes[i]);c.style.zIndex=2;lock(false);}
+ }
+ cards.forEach((c,i)=>{place(i,homes[i]);c.addEventListener('click',()=>{if(suppressClick){suppressClick=false;return;}choose(i);});
+ c.addEventListener('pointerdown',e=>{if(busy||drag)return;choose(i);suppressClick=false;drag={i,id:e.pointerId,x:e.clientX,y:e.clientY,home:{...positions[i]},moved:false};c.setPointerCapture(e.pointerId);c.style.zIndex=5;});
+ c.addEventListener('pointermove',e=>{if(!drag||drag.i!==i||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>6)drag.moved=true;if(drag.moved)place(i,{x:drag.home.x+dx,y:drag.home.y+dy,r:0});});
+ async function release(e,cancel){if(!drag||drag.i!==i||drag.id!==e.pointerId)return;const moved=drag.moved;drag=null;suppressClick=moved;const p=positions[i];if(!cancel&&moved&&p.x+45>30&&p.x+45<270&&p.y+61>190&&p.y+61<430){await insert(i);}else{place(i,homes[i]);c.style.zIndex=2;}}
+ c.addEventListener('pointerup',e=>release(e,false));c.addEventListener('pointercancel',e=>release(e,true));
+ });button.addEventListener('click',()=>insert());
+})();
 
 // Scroll effects: progress bar, poster parallax, and sections rising in
 (() => {
