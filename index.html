@@ -324,6 +324,8 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
 .maze-pad button[data-dir="down"] { grid-row:2; grid-column:2; }
 .maze-pad button[data-dir="right"] { grid-row:2; grid-column:3; }
 .maze-game button:disabled { opacity:.5; cursor:default; }
+</style><style>
+.decision-game{max-width:540px;margin:auto;text-align:center}.decision-game h2{margin:18px 0 12px}.decision-progress{color:#ffd25e;font-weight:800;margin:16px 0}.candidate-card{position:relative;max-width:340px;margin:auto;border-radius:22px;overflow:hidden;background:#fff9e8;color:#141a33;border:3px solid #ffd25e}.candidate-art{width:100%;aspect-ratio:1/1.42;background-image:url('candidates-ai.png');background-size:400% 200%;background-repeat:no-repeat}.candidate-copy{padding:12px 18px 18px;background:#fff9e8;min-height:122px}.candidate-copy h3{margin:0;font-size:1.5rem}.candidate-copy p{margin:6px 0 0;font-size:1.1rem;font-weight:600}.slap-hand{position:absolute;top:30%;right:-100px;font-size:6rem;opacity:0;pointer-events:none}.decision-stamp{position:absolute;top:16px;left:12px;font-size:1.3rem;font-weight:800;border:3px solid currentColor;padding:6px 12px;border-radius:10px;background:#fff;transform:rotate(-10deg);display:none}.candidate-card.allowed .decision-stamp,.candidate-card.slapped .decision-stamp{display:block}.candidate-card.allowed .decision-stamp{color:#16834e}.candidate-card.slapped .decision-stamp{color:#d3435d}.candidate-card.slapped .candidate-art{animation:comic-wobble .5s ease}.candidate-card.slapped .slap-hand{animation:comic-slap .55s ease}.decision-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0}.decision-actions button{flex:1;min-width:145px}.decision-actions .allow{background:#16834e;box-shadow:0 5px 0 #0b5330}.decision-actions .slap{background:#ffd25e;color:#141a33;box-shadow:0 5px 0 #b8860b}#decisionMessage{min-height:3.2em;margin:16px 0 8px;font-weight:800}#decisionResults{padding:28px 18px;background:#141b35;border:1px solid #4d68ff;border-radius:20px;margin-bottom:20px}#decisionResults h3{font-size:1.7rem;margin:0 0 16px}#decisionResults p{font-size:1.15rem}.decision-game button:disabled{opacity:.65;cursor:default}@keyframes comic-wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-7deg) translateX(-14px)}60%{transform:rotate(5deg) translateX(8px)}}@keyframes comic-slap{0%{right:-100px;opacity:0}35%,55%{right:25%;opacity:1}100%{right:90%;opacity:0}}@media(prefers-reduced-motion:reduce){.candidate-card.slapped .candidate-art,.candidate-card.slapped .slap-hand{animation:none}}@media(max-width:420px){.candidate-card{max-width:280px}.candidate-art{aspect-ratio:1/1.15}.decision-actions .cta{font-size:1rem;padding:14px 10px;min-width:120px}}
 </style></head>
 <body>
 
@@ -392,15 +394,16 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
     <div class="jokes" id="jokes"></div>
   </div></section>
 
-  <section class="band" aria-labelledby="maze-title"><div class="wrap"><div class="maze-game">
-<div class="maze-heading"><img src="yinon-avatar.png" alt="ינון בגרסה מאוירת"><div><span class="tag">המרוץ לוועד</span><h2 id="maze-title">ימיני במבוך!</h2></div></div>
-<p class="sub">אספו את כל הפתקים וברחו מהמוקשים — גם הם רוצים להתמודד! כוכב נותן מגן ל־6 שניות.</p>
-<div class="maze-stats"><span>פתקים <b id="mazeScore">0</b></span><span>חיים <b id="mazeLives">♥ ♥ ♥</b></span><span>מגן <b id="mazeShield">—</b></span></div>
-<canvas id="mazeCanvas" width="600" height="600" tabindex="0" aria-label="מבוך המשחק. שליטה בחצים או בכפתורי הכיוון שמתחת ללוח.">משחק מבוך: השתמשו בדפדפן התומך בקנבס.</canvas>
-<p id="mazeMessage" role="status">ינון מוכן. מי יגיע לוועד?</p>
-<div class="maze-actions"><button class="cta" id="mazeStart">מתחילים במרוץ</button><button class="again" id="mazePause" disabled>השהיה</button></div>
-<div class="maze-pad" role="group" aria-label="כפתורי כיוון"><button data-dir="up" aria-label="למעלה">↑</button><button data-dir="left" aria-label="שמאלה">←</button><button data-dir="down" aria-label="למטה">↓</button><button data-dir="right" aria-label="ימינה">→</button></div>
-<p class="game-help">חצים במחשב · כפתורי הכיוון או החלקה על הלוח בנייד · רווח להשהיה</p>
+  <section class="band" aria-labelledby="decision-title"><div class="wrap"><div class="decision-game">
+<span class="tag">8 מתמודדים. אתם מחליטים.</span><h2 id="decision-title">מתמודד או כאפה?</h2>
+<p class="sub">ינון פוגש את המתחרים. שומעים את ההבטחה ובוחרים מה קורה עכשיו.</p>
+<div class="decision-progress" id="decisionProgress"></div>
+<div class="candidate-card" id="candidateCard"><div class="candidate-art" id="candidateArt" role="img"></div><span class="slap-hand" aria-hidden="true">✋</span><span class="decision-stamp" id="decisionStamp" aria-hidden="true"></span><div class="candidate-copy"><h3 id="candidateName"></h3><p id="candidatePitch"></p></div></div>
+<p id="decisionMessage" role="status">מי מקבל מקום במרוץ?</p>
+<div class="decision-actions"><button class="cta allow" id="allowCandidate">לתת להתמודד ✓</button><button class="cta slap" id="slapCandidate">לתת כאפה ✋</button></div>
+<button class="cta" id="nextCandidate" hidden>למתמודד הבא ←</button>
+<div id="decisionResults" hidden></div><button class="again" id="decisionAgain" hidden>סיבוב חדש</button>
+<p class="game-help">המתמודדים דמיוניים. הכאפות מצוירות. ההבטחות? תחליטו בעצמכם 😎</p>
 </div></div></section>
 
   <div class="band"><div class="wrap"><section class="vote" aria-labelledby="vote-title">
@@ -514,68 +517,15 @@ JOKES.forEach(([promise, status]) => {
   jokesEl.append(b);
 });
 
-// Original maze chase game with keyboard and touch controls.
+// Eight fictional candidates, two comic choices, and a complete round summary.
 (() => {
- const map = [
- '###############',
- '#.....#.......#',
- '#.###.#.###.#.#',
- '#o#.......#.#o#',
- '#.#.###.#.#.#.#',
- '#...#...#.....#',
- '###.#.#####.#.#',
- '#...#.......#.#',
- '#.#####.###.#.#',
- '#.......#.....#',
- '#.###.#.#.###.#',
- '#o..#.#.....#o#',
- '#.#.#.#####.#.#',
- '#.#...........#',
- '###############'];
- const canvas=document.getElementById('mazeCanvas'), ctx=canvas.getContext('2d');
- const start=document.getElementById('mazeStart'), pause=document.getElementById('mazePause'), msg=document.getElementById('mazeMessage');
- const scoreEl=document.getElementById('mazeScore'), livesEl=document.getElementById('mazeLives'), shieldEl=document.getElementById('mazeShield');
- const avatar=new Image(); avatar.src='yinon-avatar.png'; avatar.onload=draw;
- const dirs={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]}, size=40;
- let player, enemies, pellets, powers, score=0,lives=3,shield=0,invincible=0, elapsed=0;
- let state='ready', direction='right', desired='right', last=0,acc=0,enemyAcc=0,total=0;
- const walk=(x,y)=>map[y]?.[x] && map[y][x]!=='#';
- const key=(x,y)=>x+','+y;
- const same=(a,b)=>a.x===b.x&&a.y===b.y;
- function positions(){ player={x:1,y:1}; enemies=[{x:13,y:13,color:'#ff657b'},{x:13,y:1,color:'#b38aff'},{x:1,y:13,color:'#ff9a49'}]; direction=desired='right'; }
- function reset(){ positions();score=0;lives=3;shield=0;invincible=0;elapsed=0;pellets=new Set();powers=new Set();
- map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='.')pellets.add(key(x,y));if(c==='o')powers.add(key(x,y));}));pellets.delete('1,1');total=pellets.size;pulse();draw(); }
- function pulse(){scoreEl.textContent=score+' / '+total;livesEl.textContent='♥ '.repeat(lives).trim();shieldEl.textContent=shield>elapsed?Math.ceil((shield-elapsed)/1000)+' שנ׳':'—';}
- function end(won){state='over';pause.disabled=true;start.disabled=false;start.textContent='עוד מרוץ';msg.textContent=won?'ינון ניצח במרוץ לוועד! 🏆 כל הפתקים נאספו.':'המתמודדים תפסו את ינון! נסו שוב 💪';draw();}
- function collide(){if(elapsed<invincible)return;const foe=enemies.find(e=>same(e,player));if(!foe)return;if(shield>elapsed){foe.x=13;foe.y=13;return;}lives--;if(!lives){pulse();end(false);return;}positions();invincible=elapsed+2000;msg.textContent='אופס! נשארו '+lives+' חיים. יש לכם רגע לברוח.';}
- function step(){
- let d=dirs[desired];if(walk(player.x+d[0],player.y+d[1]))direction=desired;
- d=dirs[direction];if(walk(player.x+d[0],player.y+d[1])){player.x+=d[0];player.y+=d[1];}
- const k=key(player.x,player.y);if(pellets.delete(k))score++;
- if(powers.delete(k)){shield=elapsed+6000;msg.textContent='מגן פעיל! עכשיו אפשר לעבור דרך המתמודדים ⭐';}
- collide();if(state==='playing'&&!pellets.size)end(true);pulse();
- }
- function distances(){const out=new Map([[key(player.x,player.y),0]]),q=[player];for(let i=0;i<q.length;i++){const p=q[i];for(const [dx,dy] of Object.values(dirs)){const x=p.x+dx,y=p.y+dy,k=key(x,y);if(walk(x,y)&&!out.has(k)){out.set(k,out.get(key(p.x,p.y))+1);q.push({x,y});}}}return out;}
- function chase(){const dist=distances();enemies.forEach(e=>{let opts=Object.values(dirs).map(([dx,dy])=>({x:e.x+dx,y:e.y+dy})).filter(p=>walk(p.x,p.y));opts.sort((a,b)=>(dist.get(key(a.x,a.y))-dist.get(key(b.x,b.y)))*(shield>elapsed?-1:1));const next=Math.random()<.25?opts[Math.floor(Math.random()*opts.length)]:opts[0];if(next){e.x=next.x;e.y=next.y;}});collide();}
- function draw(){if(!player)return;ctx.clearRect(0,0,600,600);ctx.fillStyle='#080e23';ctx.fillRect(0,0,600,600);
- map.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='#'){ctx.fillStyle='#122957';ctx.fillRect(x*size+3,y*size+3,34,34);ctx.strokeStyle='#385bed';ctx.strokeRect(x*size+3.5,y*size+3.5,33,33);}}));
- pellets.forEach(k=>{const [x,y]=k.split(',').map(Number);ctx.fillStyle='#ffe5a0';ctx.fillRect(x*size+16,y*size+15,8,10);});
- powers.forEach(k=>{const [x,y]=k.split(',').map(Number);ctx.font='24px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('⭐',x*size+20,y*size+20);});
- enemies.forEach(e=>{const x=e.x*size+20,y=e.y*size+20;ctx.strokeStyle=e.color;ctx.lineWidth=3;for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*11,y+Math.sin(a)*11);ctx.lineTo(x+Math.cos(a)*17,y+Math.sin(a)*17);ctx.stroke();}ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(x,y,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(x-7,y-5,5,6);ctx.fillRect(x+2,y-5,5,6);ctx.fillStyle='#111';ctx.fillRect(x-5,y-3,2,3);ctx.fillRect(x+3,y-3,2,3);});
- const x=player.x*size,y=player.y*size;ctx.save();if(elapsed<invincible&&Math.floor(elapsed/120)%2)ctx.globalAlpha=.45;
- ctx.strokeStyle=shield>elapsed?'#7dffe5':'#ffd25e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x+20,y+20,18,0,Math.PI*2);ctx.stroke();if(avatar.complete&&avatar.naturalWidth)ctx.drawImage(avatar,x+3,y+2,34,36);else {ctx.fillStyle='#ffd25e';ctx.beginPath();ctx.arc(x+20,y+20,14,0,Math.PI*2);ctx.fill();}ctx.restore();
- if(state==='paused'||state==='over'){ctx.fillStyle='rgba(3,8,23,.8)';ctx.fillRect(0,220,600,150);ctx.fillStyle='#fff';ctx.font='bold 36px sans-serif';ctx.textAlign='center';ctx.fillText(state==='paused'?'הפסקה קטנה':lives?'ניצחון! 🏆':'נתראה במרוץ הבא',300,295);}
- }
- function frame(now){const delta=Math.min(now-last,100);last=now;if(state==='playing'){elapsed+=delta;acc+=delta;enemyAcc+=delta;if(acc>=155){acc-=155;step();}if(state==='playing'&&enemyAcc>=360){enemyAcc-=360;chase();}pulse();draw();}requestAnimationFrame(frame);}
- function turn(d){if(state!=='playing')return;desired=d;}
- function toggle(){if(state==='playing'){state='paused';pause.textContent='ממשיכים';}else if(state==='paused'){state='playing';pause.textContent='השהיה';canvas.focus({preventScroll:true});}draw();}
- start.addEventListener('click',()=>{reset();state='playing';acc=enemyAcc=0;start.disabled=true;pause.disabled=false;pause.textContent='השהיה';msg.textContent='אספו פתקים. המוקשים כבר בדרך אליכם!';canvas.focus({preventScroll:true});canvas.scrollIntoView({block:'center',behavior:'instant'});});pause.addEventListener('click',toggle);
- canvas.addEventListener('keydown',e=>{const d={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',a:'left',s:'down',d:'right'}[e.key];if(d){e.preventDefault();turn(d);}if(e.code==='Space'){e.preventDefault();toggle();}});
- document.querySelectorAll('.maze-pad button').forEach(b=>b.addEventListener('click',e=>{turn(b.dataset.dir);}));
- let touch=null;canvas.addEventListener('pointerdown',e=>{touch={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);canvas.focus({preventScroll:true});});canvas.addEventListener('pointerup',e=>{if(!touch)return;const dx=e.clientX-touch.x,dy=e.clientY-touch.y;if(Math.max(Math.abs(dx),Math.abs(dy))>12)turn(Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up');touch=null;});canvas.addEventListener('pointercancel',()=>touch=null);
- document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')toggle();});reset();requestAnimationFrame(frame);
+ const people=[['רוני הרשימות','אני מבטיח להכין רשימה של כל הרשימות!'],['דנה הדרמה','כל הודעה בקבוצה תגיע עם טריילר דרמטי.'],['גבי המזגן','18 מעלות. גם בחורף. אין משא ומתן.'],['נועה ההפסקות','אצלי השיעור יהיה הפסקה בין שתי הפסקות.'],['אורי האירועים','כל יום מסיבה. מי צריך סיבה?'],['מיקה המתוקים','ישיבת ועד בלי עוגיות? לא במשמרת שלי.'],['תומר הזורם','אין לי מצע, אבל תזרמו איתי.'],['שירה הסדר','גם לבלאגן יהיה לוח זמנים מסודר.']];
+ const el=id=>document.getElementById(id),card=el('candidateCard'),art=el('candidateArt'),allow=el('allowCandidate'),slap=el('slapCandidate'),next=el('nextCandidate'),again=el('decisionAgain'),results=el('decisionResults'),message=el('decisionMessage');
+ let index=0,choices=[];
+ function render(){card.className='candidate-card';card.hidden=false;results.hidden=true;again.hidden=true;next.hidden=true;allow.disabled=slap.disabled=false;allow.parentElement.hidden=false;el('decisionProgress').textContent=`מתמודד ${index+1} מתוך 8`;el('candidateName').textContent=people[index][0];el('candidatePitch').textContent='״'+people[index][1]+'״';art.style.backgroundPosition=`${(index%4)*100/3}% ${index<4?0:100}%`;art.setAttribute('aria-label','איור של '+people[index][0]);message.textContent='מי מקבל מקום במרוץ?';}
+ function choose(ok){if(choices.length!==index)return;choices.push(ok);allow.disabled=slap.disabled=true;card.classList.add(ok?'allowed':'slapped');el('decisionStamp').textContent=ok?'במרוץ! ✓':'פאף! ✋';message.textContent=ok?people[index][0]+' נכנסו למרוץ. ינון, יש לך תחרות!':'כאפה מצוירת! '+people[index][0]+' הולכים לנסח מצע חדש 😵‍💫';next.textContent=index===7?'לתוצאות הסיבוב ←':'למתמודד הבא ←';next.hidden=false;next.focus({preventScroll:true});}
+ allow.addEventListener('click',()=>choose(true));slap.addEventListener('click',()=>choose(false));next.addEventListener('click',()=>{index++;if(index<8){render();allow.focus({preventScroll:true});return;}card.hidden=true;allow.parentElement.hidden=true;next.hidden=true;results.hidden=false;again.hidden=false;el('decisionProgress').textContent='8 מתוך 8 — הסיבוב הושלם';const accepted=choices.filter(Boolean).length;results.innerHTML='<h3>המרוץ לוועד מוכן! 🗳️</h3><p>'+accepted+' מתמודדים קיבלו אישור ✓</p><p>'+(8-accepted)+' כאפות מצוירות חולקו ✋</p>';message.textContent='ובסוף… ינון נשאר ינון 😎';again.focus({preventScroll:true});});again.addEventListener('click',()=>{index=0;choices=[];render();allow.focus({preventScroll:true});});render();
 })();
-
 
 // Ballot: drag Yinon's slip into the box (or press the button) and it slides through the slot.
 const stage = document.getElementById('stage');
