@@ -285,7 +285,7 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
 }
 
 </style>
-</head>
+<style>html, body { scrollbar-width: none; } html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }</style></head>
 <body>
 
   <header class="poster">
@@ -387,7 +387,7 @@ footer > .wrap { color: var(--muted); padding-block: 28px; }
 
 
 
-<audio id="song" src="yinon-song.mp3" preload="auto" loop></audio>
+<audio id="song" src="yinon-song.mp3" preload="auto" autoplay loop></audio>
 <div class="player">
   <button class="music" id="musicBtn" type="button" aria-pressed="false">
     <svg class="spk" viewBox="0 0 24 24" aria-hidden="true">
@@ -416,9 +416,9 @@ function syncMusic() {
 function tryPlay() { song.play().catch(() => {}); }
 song.addEventListener('play', syncMusic);
 song.addEventListener('pause', syncMusic);
-tryPlay();
 const vol = document.getElementById('vol');
 song.volume = vol.value / 100;
+tryPlay();
 vol.addEventListener('input', () => {
   song.volume = vol.value / 100;
   if (song.paused && vol.value > 0 && !userPaused) tryPlay();
